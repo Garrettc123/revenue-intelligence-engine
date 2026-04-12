@@ -24,6 +24,9 @@ from datetime import datetime, timezone
 from typing import Optional
 from dataclasses import dataclass, asdict
 
+from rhns.causal_memory import CausalMemory
+from rhns.feedback_loop import FeedbackLoop
+
 @dataclass
 class RevenueSignal:
     source: str
@@ -44,6 +47,8 @@ class RHNSRevenueEngine:
         self.slack_webhook = os.getenv('SLACK_WEBHOOK_URL', '')
         self.linear_key = os.getenv('LINEAR_API_KEY', '')
         self.signals: list[RevenueSignal] = []
+        self.memory = CausalMemory()
+        self.feedback = FeedbackLoop(self.memory)
         
     def reason(self, data: dict) -> dict:
         """RHNS Layer 1: Reason — extract first-principles signal from raw data."""
@@ -63,11 +68,20 @@ class RHNSRevenueEngine:
             signal_type = 'revenue_confirmed'
             urgency = 'low'
             confidence = 1.0
+
+        # Consult causal memory before finalizing reasoning
+        memory_context = self.memory.format_for_reason_layer(signal_type)
+        print(f"[REASON] Causal memory context:\n{memory_context}")
+
+        # Apply confidence adjustment based on historical outcomes
+        adjustment = self.memory.confidence_adjustment(signal_type)
+        confidence = min(0.99, confidence * adjustment)
             
         return {
             'signal_type': signal_type,
             'urgency': urgency,
-            'confidence': confidence
+            'confidence': confidence,
+            'memory_context': memory_context,
         }
     
     def harmonize(self, signals: list) -> list:
@@ -96,14 +110,29 @@ class RHNSRevenueEngine:
             return f"UPSELL_TRIGGER: Present upgrade offer. Incremental value ${signal.value_usd:.2f}"
         return "MONITOR: Track signal for 24h before action"
     
-    def enforce_standards(self, action: str, signal: RevenueSignal) -> dict:
+    def enforce_standards(self, action: str, signal: RevenueSignal, cycle_id: str = "") -> dict:
         """RHNS Layer 4: Standards — quality gate before execution."""
-        return {
+        approved = signal.confidence >= 0.6
+        verdict = {
             'action': action,
-            'approved': signal.confidence >= 0.6,
-            'reason': 'Confidence threshold met' if signal.confidence >= 0.6 else 'Below confidence threshold — human review required',
+            'approved': approved,
+            'reason': 'Confidence threshold met' if approved else 'Below confidence threshold — human review required',
             'signal': asdict(signal)
         }
+
+        # Record decision into causal memory for future feedback
+        entry_id = self.memory.record(
+            signal_type=signal.signal_type,
+            signal_source=signal.source,
+            action_taken=action,
+            action_approved=approved,
+            value_usd=signal.value_usd,
+            confidence=signal.confidence,
+            cycle_id=cycle_id,
+            tags=[signal.urgency],
+        )
+        verdict['memory_entry_id'] = entry_id
+        return verdict
     
     def check_stripe(self) -> list[RevenueSignal]:
         """Poll Stripe for recent payment events."""
@@ -186,7 +215,8 @@ class RHNSRevenueEngine:
     
     def run_cycle(self) -> dict:
         """Execute one full RHNS intelligence cycle."""
-        print(f"[{datetime.now(timezone.utc).isoformat()}] Starting RHNS Revenue Intelligence Cycle...")
+        cycle_id = f"cycle-{int(time.time())}"
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Starting RHNS Revenue Intelligence Cycle... ({cycle_id})")
         
         # Collect signals
         raw_signals = []
@@ -208,22 +238,29 @@ class RHNSRevenueEngine:
         results = []
         for signal in harmonized:
             action = self.navigate(signal)
-            verdict = self.enforce_standards(action, signal)
+            verdict = self.enforce_standards(action, signal, cycle_id=cycle_id)
             results.append(verdict)
             
             if verdict['approved'] and signal.urgency in ('immediate', 'high'):
                 self.broadcast(f"{action} | Confidence: {signal.confidence:.0%}", signal.urgency)
         
+        # Close the feedback loop — resolve pending causal memory entries
+        feedback_stats = self.feedback.run()
+        print(f"[FEEDBACK] Resolved {feedback_stats['resolved_this_run']} pending memory entries")
+
         # Write output
         output = {
+            'cycle_id': cycle_id,
             'cycle_time': datetime.now(timezone.utc).isoformat(),
             'signals_processed': len(harmonized),
             'actions_approved': sum(1 for r in results if r['approved']),
-            'results': results
+            'results': results,
+            'feedback_stats': feedback_stats,
+            'memory_stats': self.memory.stats(),
         }
         
         os.makedirs('output', exist_ok=True)
-        with open(f"output/cycle-{int(time.time())}.json", 'w') as f:
+        with open(f"output/{cycle_id}.json", 'w') as f:
             json.dump(output, f, indent=2)
         
         print(f"Cycle complete: {len(harmonized)} signals → {output['actions_approved']} actions approved")
