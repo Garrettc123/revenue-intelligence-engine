@@ -1,0 +1,21 @@
+name: RHNS Feedback Loop — CI
+
+on:
+  push:
+    paths: ["rhns/**", "tests/**"]
+  workflow_dispatch:
+
+jobs:
+  test-causal-memory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests pytest
+      - run: pytest tests/test_causal_memory.py -v
+      - name: Summary
+        run: |
+          echo "## RHNS Causal Memory CI" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Feedback loop unit tests passed" >> $GITHUB_STEP_SUMMARY
