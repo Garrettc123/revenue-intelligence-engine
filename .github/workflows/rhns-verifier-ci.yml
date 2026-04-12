@@ -1,0 +1,21 @@
+name: RHNS Symbolic Verifier — CI
+
+on:
+  push:
+    paths: ["rhns/**", "tests/**"]
+  workflow_dispatch:
+
+jobs:
+  test-symbolic-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pytest
+      - run: pytest tests/test_symbolic_verifier.py -v
+      - name: Summary
+        run: |
+          echo "## RHNS Symbolic Verifier CI" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Constraint engine unit tests passed" >> $GITHUB_STEP_SUMMARY
