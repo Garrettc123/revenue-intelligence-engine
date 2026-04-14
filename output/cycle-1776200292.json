@@ -1,0 +1,52 @@
+{
+  "cycle_id": "cycle-1776200292",
+  "cycle_time": "2026-04-14T20:58:12.070314+00:00",
+  "signals_processed": 1,
+  "actions_approved": 1,
+  "results": [
+    {
+      "action": "MONITOR: Track signal for 24h before action",
+      "approved": true,
+      "reason": "Confidence threshold met",
+      "signal": {
+        "source": "stripe",
+        "signal_type": "system_offline",
+        "value_usd": 0,
+        "confidence": 1.0,
+        "action_required": "Add STRIPE_SECRET_KEY secret",
+        "urgency": "high",
+        "timestamp": "2026-04-14T20:58:12.069910+00:00",
+        "metadata": {
+          "error": "No Stripe key configured"
+        }
+      },
+      "memory_entry_id": "bbce9e02143e139b"
+    }
+  ],
+  "feedback_stats": {
+    "resolved_this_run": 1,
+    "memory_stats": {
+      "total_entries": 1,
+      "resolved": 0,
+      "pending_resolution": 1,
+      "success_rate": 0.0,
+      "failure_rate": 0.0,
+      "total_value_tracked_usd": 0,
+      "signal_types": [
+        "system_offline"
+      ]
+    },
+    "timestamp": "2026-04-14T20:58:12.070308+00:00"
+  },
+  "memory_stats": {
+    "total_entries": 1,
+    "resolved": 0,
+    "pending_resolution": 1,
+    "success_rate": 0.0,
+    "failure_rate": 0.0,
+    "total_value_tracked_usd": 0,
+    "signal_types": [
+      "system_offline"
+    ]
+  }
+}
