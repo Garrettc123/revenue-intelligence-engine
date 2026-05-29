@@ -8,7 +8,7 @@ STRIPE_LINK = os.getenv("STRIPE_AUDIT_LINK", "https://buy.stripe.com/dRm8wPbb72p
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    return f"""<!DOCTYPE html>
+    html = f"""<!DOCTYPE html>
 <html><head><title>Garcar Enterprise</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
@@ -30,6 +30,7 @@ p{{font-size:1.125rem;color:#999;line-height:1.7;margin-bottom:2rem;max-width:48
 <p class="sub">48-hour turnaround · No fluff · Ranked automation roadmap</p>
 </div>
 </body></html>"""
+    return html
 
 @app.get("/audit")
 async def audit():
@@ -37,19 +38,20 @@ async def audit():
 
 @app.get("/health")
 async def health():
-    return JSONResponse({{"status":"ok","service":"garcar-landing","version":"3.1.0"}})
+    return JSONResponse({"status": "ok", "service": "garcar-landing", "version": "3.1.0"})
 
 @app.get("/pricing")
 async def pricing():
-    return JSONResponse({{"tiers":[
-        {{"name":"Starter Audit","price":47,"type":"one_time"}},
-        {{"name":"Diagnostic","price":497,"type":"one_time"}},
-        {{"name":"Starter Retainer","price":997,"type":"monthly"}},
-        {{"name":"Growth","price":2500,"type":"monthly"}},
-        {{"name":"Enterprise","price":5000,"type":"monthly"}},
-        {{"name":"Founding Pilot","price":10000,"type":"one_time"}}
-    ]}})
+    tiers = [
+        {"name": "Starter Audit", "price": 47, "type": "one_time"},
+        {"name": "Diagnostic", "price": 497, "type": "one_time"},
+        {"name": "Starter Retainer", "price": 997, "type": "monthly"},
+        {"name": "Growth", "price": 2500, "type": "monthly"},
+        {"name": "Enterprise", "price": 5000, "type": "monthly"},
+        {"name": "Founding Pilot", "price": 10000, "type": "one_time"}
+    ]
+    return JSONResponse({"tiers": tiers})
 
 @app.post("/webhook")
 async def webhook(request: Request):
-    return JSONResponse({{"received":True}})
+    return JSONResponse({"received": True})
