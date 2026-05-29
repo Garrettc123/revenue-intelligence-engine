@@ -1,1 +1,5 @@
-requests>=2.31.0
+fastapi
+uvicorn
+stripe
+httpx
+pydantic
