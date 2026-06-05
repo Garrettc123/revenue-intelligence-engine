@@ -1,0 +1,38 @@
+name: RHNS Standards Gate CI
+
+on:
+  push:
+    paths:
+      - 'rhns/**'
+      - 'tests/test_standards_gate_integration.py'
+      - 'engine.py'
+  pull_request:
+    paths:
+      - 'rhns/**'
+      - 'tests/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest requests
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run StandardsGate integration tests
+        run: |
+          pytest tests/test_standards_gate_integration.py -v --tb=short
+
+      - name: Verify proof_certificates.jsonl exists
+        run: |
+          ls -la rhns/proof_certificates.jsonl
+          echo "Proof log present — gate is wired."
