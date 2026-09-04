@@ -223,6 +223,24 @@ def test_source_unavail_blocks_provider_named_in_action_body(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# Test 4h2: provider names in lowercase body still trigger checks
+# ---------------------------------------------------------------------------
+def test_source_unavail_blocks_lowercase_provider_in_action_body(monkeypatch):
+    """Lowercase provider names in action body should trigger source checks."""
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="ROUTE_ALERT: use openai summarization for risk brief",
+        signal_type="analysis",
+        urgency="medium",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" in rule_ids
+
+
+# ---------------------------------------------------------------------------
 # Test 4h: provider substrings inside words do not trigger source checks
 # ---------------------------------------------------------------------------
 def test_source_unavail_does_not_match_provider_substring_in_word(monkeypatch):
