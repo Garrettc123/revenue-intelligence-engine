@@ -128,6 +128,137 @@ def test_source_unavail_blocks_shopify_without_key(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# Test 4c: source unavailability blocks AWS action without secret key
+# ---------------------------------------------------------------------------
+def test_source_unavail_blocks_aws_without_secret_key(monkeypatch):
+    """AWS action requires both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY."""
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "AKIA1234567890ABCDEF")
+    monkeypatch.delenv("AWS_SECRET_ACCESS_KEY", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="AWS_UPLOAD: Archive proof bundle to S3",
+        signal_type="audit_archive",
+        urgency="low",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    assert result.approved is False
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" in rule_ids
+
+
+# ---------------------------------------------------------------------------
+# Test 4d: source unavailability blocks AWS action without access key id
+# ---------------------------------------------------------------------------
+def test_source_unavail_blocks_aws_without_access_key_id(monkeypatch):
+    """AWS action requires both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY."""
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "secret")
+    monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="AWS_UPLOAD: Archive proof bundle to S3",
+        signal_type="audit_archive",
+        urgency="low",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    assert result.approved is False
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" in rule_ids
+
+
+# ---------------------------------------------------------------------------
+# Test 4e: AWS substring does not trigger AWS source requirement
+# ---------------------------------------------------------------------------
+def test_source_unavail_does_not_match_aws_substring(monkeypatch):
+    """Non-AWS source tokens containing 'AWS' as a substring should not require AWS keys."""
+    monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+    monkeypatch.delenv("AWS_SECRET_ACCESS_KEY", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="MULTI_AWSYNC_ALERT: Correlate platform signals",
+        signal_type="signal_merge",
+        urgency="medium",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" not in rule_ids
+
+
+# ---------------------------------------------------------------------------
+# Test 4f: source matching supports provider-prefixed action tokens
+# ---------------------------------------------------------------------------
+def test_source_unavail_blocks_openai_prefixed_action(monkeypatch):
+    """OPENAI-prefixed actions should require OPENAI_API_KEY."""
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="OPENAI_SUMMARIZE: Build revenue risk summary",
+        signal_type="analysis",
+        urgency="medium",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" in rule_ids
+
+
+# ---------------------------------------------------------------------------
+# Test 4g: source matching supports provider names in action body
+# ---------------------------------------------------------------------------
+def test_source_unavail_blocks_provider_named_in_action_body(monkeypatch):
+    """Provider names in action text should still trigger source availability checks."""
+    monkeypatch.delenv("SHOPIFY_ACCESS_TOKEN", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="ROUTE_ALERT: escalate through SHOPIFY support playbook",
+        signal_type="escalation",
+        urgency="medium",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" in rule_ids
+
+
+# ---------------------------------------------------------------------------
+# Test 4h: provider substrings inside words do not trigger source checks
+# ---------------------------------------------------------------------------
+def test_source_unavail_does_not_match_provider_substring_in_word(monkeypatch):
+    """Embedded provider substrings like 'myshopify' should not trigger source checks."""
+    monkeypatch.delenv("SHOPIFY_ACCESS_TOKEN", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="ROUTE_ALERT: tag account as myshopify migration",
+        signal_type="escalation",
+        urgency="medium",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" not in rule_ids
+
+
+# ---------------------------------------------------------------------------
+# Test 4i: provider token in action prefix still triggers source checks
+# ---------------------------------------------------------------------------
+def test_source_unavail_blocks_provider_token_in_action_prefix(monkeypatch):
+    """Underscore-delimited provider tokens in action prefixes should trigger checks."""
+    monkeypatch.delenv("SHOPIFY_ACCESS_TOKEN", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="ROUTE_ALERT_SHOPIFY: escalate order issue",
+        signal_type="escalation",
+        urgency="medium",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" in rule_ids
+
+
+# ---------------------------------------------------------------------------
 # Test 5: urgency-action compatibility blocks CAMPAIGN on low urgency
 # ---------------------------------------------------------------------------
 def test_urgency_compat_blocks_campaign_on_low_urgency():

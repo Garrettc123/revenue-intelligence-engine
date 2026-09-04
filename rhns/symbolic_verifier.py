@@ -17,6 +17,7 @@ The verifier enforces hard rules that override model confidence:
 
 import json
 import os
+import re
 import hashlib
 import time
 from dataclasses import dataclass, field, asdict
@@ -178,15 +179,39 @@ class SymbolicVerifier:
             "ZAPIER": "ZAPIER_WEBHOOK_URL",
             "AWS": "AWS_ACCESS_KEY_ID",
         }
+        action_text = str(action)
+        action_upper = action_text.upper()
+        action_parts = action_upper.split(":", 1)
+        action_prefix = action_parts[0].strip()
+        action_body = action_parts[1] if len(action_parts) > 1 else ""
+        action_prefix_tokens = [tok for tok in action_prefix.split("_") if tok]
         for keyword, env_key in source_key_map.items():
-            if keyword in action.upper():
-                if not os.getenv(env_key):
+            is_prefix_match = (
+                re.match(rf"^{re.escape(keyword)}(?:_|$)", action_prefix) is not None
+                or keyword in action_prefix_tokens
+            )
+            is_body_match = (
+                re.search(
+                    rf"(?<![A-Z0-9_]){re.escape(keyword)}(?![A-Z0-9_])",
+                    action_body,
+                )
+                is not None
+            )
+            is_source_match = is_prefix_match or is_body_match
+            if is_source_match:
+                has_required_key = bool(os.getenv(env_key))
+                if keyword == "AWS":
+                    aws_key_id = bool((os.getenv("AWS_ACCESS_KEY_ID") or "").strip())
+                    aws_secret = bool((os.getenv("AWS_SECRET_ACCESS_KEY") or "").strip())
+                    has_required_key = aws_secret and aws_key_id
+                if not has_required_key:
+                    missing_key = env_key if keyword != "AWS" else "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
                     return ConstraintViolation(
                         rule_id=self.RULE_SOURCE_AVAIL,
                         rule_name="Source Availability",
-                        description=f"Action requires {keyword} but {env_key} is not configured.",
+                        description=f"Action requires {keyword} but {missing_key} is not configured.",
                         severity="hard",
-                        counterexample=f"Add {env_key} to GitHub Actions secrets, or reroute action to an available source.",
+                        counterexample=f"Add {missing_key} to GitHub Actions secrets, or reroute action to an available source.",
                     )
         return None
     

@@ -89,6 +89,8 @@ Go to **Settings → Secrets and variables → Actions** and add:
 | `AWS_ACCESS_KEY_ID` | Optional | AWS access key ID |
 | `AWS_SECRET_ACCESS_KEY` | Optional | AWS secret access key |
 
+> Legacy compatibility: the GitHub Actions workflow maps `SLACK_WEBHOOK_URL` from `SLACK_WEBHOOK_URL` or `DEFENDER_SLACK_WEBHOOK`; this is workflow-level mapping only, and local/manual runs must set `SLACK_WEBHOOK_URL` directly.
+
 ### 2. Run Manually
 
 Trigger a cycle on-demand via **Actions → RHNS Revenue Intelligence Cycle → Run workflow**.
