@@ -109,6 +109,25 @@ def test_source_unavail_blocks_stripe_without_key(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# Test 4b: source unavailability blocks Shopify action without env key
+# ---------------------------------------------------------------------------
+def test_source_unavail_blocks_shopify_without_key(monkeypatch):
+    """SHOPIFY action without SHOPIFY_ACCESS_TOKEN env var fails SOURCE_AVAIL rule."""
+    monkeypatch.delenv("SHOPIFY_ACCESS_TOKEN", raising=False)
+    v = make_verifier()
+    result = v.verify(
+        action="SHOPIFY_REFUND: Issue order refund. Value: $49.00",
+        signal_type="refund_request",
+        urgency="high",
+        value_usd=49.0,
+        confidence=0.9,
+    )
+    assert result.approved is False
+    rule_ids = [viol.rule_id for viol in result.violations]
+    assert "SOURCE_AVAIL_004" in rule_ids
+
+
+# ---------------------------------------------------------------------------
 # Test 5: urgency-action compatibility blocks CAMPAIGN on low urgency
 # ---------------------------------------------------------------------------
 def test_urgency_compat_blocks_campaign_on_low_urgency():

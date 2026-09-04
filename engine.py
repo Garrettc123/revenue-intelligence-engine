@@ -147,6 +147,12 @@ class RHNSRevenueEngine:
         self.shopify_token = os.getenv('SHOPIFY_ACCESS_TOKEN', '')
         self.shopify_store = os.getenv('SHOPIFY_STORE_DOMAIN', '')
         self.orchestrator_webhook = os.getenv('ORCHESTRATOR_WEBHOOK_URL', '')
+        self.openai_key = os.getenv('OPENAI_API_KEY', '')
+        self.anthropic_key = os.getenv('ANTHROPIC_API_KEY', '')
+        self.notion_key = os.getenv('NOTION_API_KEY', '')
+        self.zapier_webhook = os.getenv('ZAPIER_WEBHOOK_URL', '')
+        self.aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID', '')
+        self.aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY', '')
 
         # ── RHNS core ─────────────────────────────────────────────────────
         self.signals: list[RevenueSignal] = []

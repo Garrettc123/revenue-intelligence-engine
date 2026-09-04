@@ -167,8 +167,16 @@ class SymbolicVerifier:
         source_key_map = {
             "STRIPE": "STRIPE_SECRET_KEY",
             "HUBSPOT": "HUBSPOT_API_KEY",
+            "SHOPIFY": "SHOPIFY_ACCESS_TOKEN",
+            "GUMROAD": "GUMROAD_ACCESS_TOKEN",
             "SLACK": "SLACK_WEBHOOK_URL",
             "LINEAR": "LINEAR_API_KEY",
+            "ORCHESTRATOR": "ORCHESTRATOR_WEBHOOK_URL",
+            "OPENAI": "OPENAI_API_KEY",
+            "ANTHROPIC": "ANTHROPIC_API_KEY",
+            "NOTION": "NOTION_API_KEY",
+            "ZAPIER": "ZAPIER_WEBHOOK_URL",
+            "AWS": "AWS_ACCESS_KEY_ID",
         }
         for keyword, env_key in source_key_map.items():
             if keyword in action.upper():
