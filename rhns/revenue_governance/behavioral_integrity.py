@@ -4,16 +4,7 @@ from .models import GateDecision
 
 
 class BehavioralIntegrityGate:
-    PROHIBITED_PATTERNS = (
-        "act now before it is gone",
-        "only one spot left",
-        "guaranteed revenue",
-        "guaranteed roi",
-        "you cannot afford to wait",
-        "everyone else is doing it",
-        "no risk",
-        "secret method",
-    )
+    PROHIBITED_PATTERNS = ("act now before it is gone", "only one spot left", "guaranteed revenue", "guaranteed roi", "you cannot afford to wait", "everyone else is doing it", "no risk", "secret method")
 
     @classmethod
     def evaluate_message(cls, text: str, opted_out: bool = False) -> GateDecision:

@@ -7,12 +7,4 @@ from .models import ActionClass, EvidenceLevel
 from .roi import ROICalculator
 from .vertical_genome import VerticalGenome
 
-__all__ = [
-    "ActionClass",
-    "ApprovalGate",
-    "BehavioralIntegrityGate",
-    "ClaimValidator",
-    "EvidenceLevel",
-    "ROICalculator",
-    "VerticalGenome",
-]
+__all__ = ["ActionClass", "ApprovalGate", "BehavioralIntegrityGate", "ClaimValidator", "EvidenceLevel", "ROICalculator", "VerticalGenome"]

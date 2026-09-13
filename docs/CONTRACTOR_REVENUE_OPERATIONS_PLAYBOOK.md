@@ -6,44 +6,26 @@ Commercial and high-ticket service contractors with 5–75 employees, meaningful
 
 ## Core revenue leaks
 
-- Qualified leads not receiving timely response.
+- Qualified leads without timely response.
 - Estimates without a next action.
 - Proposals that become stale without review.
-- Deals missing a clear owner or close plan.
-- Past customers not considered for renewal, maintenance, referral, or expansion.
-- Lead sources that cannot be measured against gross-profit contribution.
+- Deals without a clear owner or close plan.
+- Past customers missed for renewal, maintenance, referral, or expansion.
+- Lead sources not measured against gross-profit contribution.
 
 ## Revenue Recovery Proof Sprint
 
-### Audit phase
+### Audit
 
-- Map lead intake, estimating, proposal, follow-up, close, payment, and delivery handoff.
-- Identify source systems and data owners.
-- Capture baseline response time, follow-up completion, stage conversion, average value, margin evidence, and known constraints.
-- Execute a measurement charter.
+Map lead intake, estimating, proposals, follow-up, close, payment, and delivery handoff. Identify sources and owners. Capture baseline response time, follow-up completion, stage conversion, average value, margin evidence, and constraints. Execute a measurement charter.
 
-### Recovery phase
+### Recovery
 
-- Maintain a daily opportunity queue.
-- Flag estimates and proposals outside agreed follow-up service levels.
-- Prepare human-reviewed, truthful draft communications.
-- Record approvals, actions, and observed results.
-- Review delivery capacity before recommending additional commitments.
+Maintain a daily opportunity queue. Flag estimates and proposals outside agreed follow-up service levels. Prepare human-reviewed, truthful drafts. Record approvals, actions, and observed results. Review delivery capacity before recommending commitments.
 
-### Proof phase
+### Proof
 
-- Reconcile data against approved source records.
-- Calculate operational change and, where supported, estimated incremental gross profit, net contribution, ROI, and payback.
-- Deliver a Profit & ROI Evidence Memorandum with sources, assumptions, attribution tier, and limitations.
-
-## Buyer roles and needs
-
-| Role | Primary concern | Useful proof |
-|---|---|---|
-| Owner | ROI, control, reputation | Evidence memorandum and margin-aware scorecard |
-| Sales manager | follow-up discipline, adoption | Daily queue and completion dashboard |
-| Operations manager | disruption, capacity, handoff | Workflow map, capacity controls, implementation plan |
-| Estimator | clarity, speed, ownership | Estimate queue, next action, relevant account context |
+Reconcile data against approved sources. Calculate operational change and, where supported, estimated incremental gross profit, net contribution, ROI, and payback. Deliver a Profit & ROI Evidence Memorandum with sources, assumptions, attribution tier, and limitations.
 
 ## Exclusions
 

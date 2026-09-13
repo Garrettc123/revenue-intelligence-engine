@@ -4,11 +4,7 @@ from .models import ActionClass, ActionProposal, GateDecision
 
 
 class ApprovalGate:
-    ALWAYS_APPROVAL = {
-        ActionClass.EXTERNAL_WRITE,
-        ActionClass.COMMERCIAL_COMMITMENT,
-        ActionClass.FINANCIAL_EXECUTION,
-    }
+    ALWAYS_APPROVAL = {ActionClass.EXTERNAL_WRITE, ActionClass.COMMERCIAL_COMMITMENT, ActionClass.FINANCIAL_EXECUTION}
 
     @classmethod
     def evaluate(cls, proposal: ActionProposal) -> GateDecision:
