@@ -1,0 +1,55 @@
+version: 1.0.0
+vertical: contractor_revenue_operations
+target_buyers:
+  - owner
+  - president
+  - sales manager
+  - operations manager
+  - estimator
+company_profile:
+  employees_min: 5
+  employees_max: 75
+  segments:
+    - commercial roofing
+    - HVAC
+    - plumbing
+    - electrical
+    - restoration
+    - specialty trades
+core_revenue_leaks:
+  - qualified lead without timely response
+  - estimate without follow-up
+  - proposal without current next action
+  - deal without owner
+  - missed renewal, maintenance, referral, or expansion opportunity
+  - unmeasured lead-source contribution
+primary_metrics:
+  - median time to first response
+  - follow-up completion within agreed service level
+  - active deals with owner and next action
+  - stale estimates reviewed
+  - estimate-to-win conversion
+  - documented gross-profit contribution
+  - evidence coverage rate
+approved_actions:
+  - research
+  - analyze
+  - draft_follow_up
+  - draft_decision_memo
+  - prepare_call_brief
+  - prepare_roi_memorandum
+  - recommend_internal_task
+prohibited_actions:
+  - autonomous outbound send
+  - autonomous pricing or discount
+  - autonomous contract acceptance
+  - autonomous invoice, charge, refund, or transfer
+  - false scarcity or fabricated proof
+  - post-opt-out contact
+approval_requirements:
+  external_message: authorized reviewer
+  crm_write: authorized reviewer
+  price_or_discount: commercial approver
+  contract_or_scope: authorized signatory
+  public_case_study: client permission and evidence reviewer
+  financial_action: transaction-specific authorized approver
