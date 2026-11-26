@@ -301,16 +301,18 @@ class RHNSRevenueEngine:
         except Exception as e:
             print(f"[HUBSPOT ERR] {e}")
 
-    def execute(self, verdict: dict, signal: RevenueSignal):
-        """Fire the approved action."""
-        if not verdict['approved']:
-            print(f"[EXEC] Blocked — {verdict['reason']}")
-            return
-        action = verdict['action']
-        print(f"[EXEC] Firing: {action}")
-        self._notify_slack(action)
-        if "PIPELINE_ADD" in action or "UPSELL_TRIGGER" in action:
-            self._add_hubspot_deal(signal)
+    def execute(self, verdict: dict, signal: RevenueSignal) -> dict:
+        """Never confuse model-quality approval with operator authorization.
+
+        The hourly intelligence cycle prepares proposals only. External CRM,
+        Slack and payment actions require a separate, scoped, authenticated
+        operator approval and execution adapter before any side effect.
+        """
+        if not verdict.get('approved', False):
+            print(f"[EXEC] Blocked by quality gate: {verdict.get('reason', '')}")
+            return {"status": "blocked", "reason": "quality_gate_denied"}
+        print("[EXEC] HELD: Quality-approved signal; no external action authorization.")
+        return {"status": "pending_approval", "reason": "scoped_operator_approval_required"}
 
     # ── OUTCOME + MASTERY ──────────────────────────────────────────────────
 
@@ -345,13 +347,9 @@ class RHNSRevenueEngine:
             "streak": self.MASTERY_STREAK_REQUIRED,
         }
         self.memory.store_proof(event)
-        if DAG_AVAILABLE and self.orchestrator:
-            self.orchestrator.emit_event(event)
-        if self.orchestrator_webhook:
-            try:
-                requests.post(self.orchestrator_webhook, json=event, timeout=5)
-            except Exception as e:
-                print(f"[MASTERY EMIT ERR] {e}")
+        # Quality streaks are not proof of authorized or successful actions.
+        # Keep mastery candidate records local until externally verified.
+        print("[MASTERY] Candidate recorded; external event emission withheld.")
 
     # ── MAIN CYCLE ───────────────────────────────────────────────────────────────────
 
@@ -390,11 +388,13 @@ class RHNSRevenueEngine:
         # 5. Standards gate
         verdict = self.enforce_standards(action, signal, cycle_id)
 
-        # 6. Execute
-        self.execute(verdict, signal)
+        # 6. Quality verdict is not an authorization to create external side effects.
+        execution = self.execute(verdict, signal)
+        outcome = execution["status"]
+        verdict["execution_status"] = outcome
+        verdict["execution_reason"] = execution["reason"]
 
-        # 7. Record outcome + mastery
-        outcome = 'executed' if verdict['approved'] else 'blocked'
+        # 7. Record the actual execution state, never a claimed execution.
         self.record_outcome(verdict, signal, outcome)
         self.check_mastery(signal.confidence)
 
@@ -459,7 +459,11 @@ class RHNSRevenueEngine:
             "sync_sources": self.sync.status(),
             "events_processed": len(verdicts),
             "approved": sum(1 for v in verdicts if v.get("approved")),
-            "blocked": sum(1 for v in verdicts if not v.get("approved") and "error" not in v),
+            "blocked": sum(1 for v in verdicts if v.get("execution_status") == "blocked"),
+            "held_for_approval": sum(
+                1 for v in verdicts if v.get("execution_status") == "pending_approval"
+            ),
+            "verified_external_executions": 0,
             "errors": sum(1 for v in verdicts if "error" in v),
             "mastered": self._mastered,
             "mastery_streak": self._mastery_streak,
