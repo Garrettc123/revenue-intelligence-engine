@@ -10,6 +10,8 @@ on:
     paths:
       - 'rhns/**'
       - 'tests/**'
+      - '.github/workflows/revenue-intelligence.yml'
+      - '.github/workflows/rhns-gate-ci.yml'
 
 jobs:
   test:
@@ -25,12 +27,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install pytest requests
+          pip install pytest requests pyyaml
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run StandardsGate integration tests
         run: |
-          pytest tests/test_standards_gate_integration.py tests/test_execution_approval_gate.py -v --tb=short
+          pytest tests/test_standards_gate_integration.py tests/test_execution_approval_gate.py tests/test_revenue_workflow_contract.py -v --tb=short
 
       - name: Verify proof_certificates.jsonl exists
         run: |
